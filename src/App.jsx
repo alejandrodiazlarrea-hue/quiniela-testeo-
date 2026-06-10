@@ -734,6 +734,21 @@ export default function QuinielaMundial() {
   },[participants]);
 
   // Quiz save
+  const handlePhotoBadge = async (totalPosts) => {
+    const badgeMap = {1:"PAPARAZZI", 3:"INFLUENCER", 5:"CONTENT_CREATOR"};
+    const badgeKey = badgeMap[totalPosts];
+    if (!badgeKey || !activeParticipantId) return;
+    const existing = earnedBadges.filter(b => b.participant_id===activeParticipantId && b.badge_key===badgeKey);
+    if (existing.length > 0) return;
+    await db.insertBadge(activeParticipantId, badgeKey, 0);
+    const current = coins.find(c => c.participant_id===activeParticipantId)?.total || 0;
+    await db.upsertCoins(activeParticipantId, current + 40);
+    const [newBadges, newCoins] = await Promise.all([db.getBadges(), db.getCoins()]);
+    setEarnedBadges(newBadges);
+    setCoins(newCoins);
+    flash(`🏅 ¡Nuevo badge desbloqueado!`);
+  };
+
   const handleSaveQuizAnswers=useCallback(async(answers,coinsEarned,label)=>{
     if(!activeParticipantId) return;
     const today=new Date();
