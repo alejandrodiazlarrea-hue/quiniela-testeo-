@@ -9,6 +9,8 @@ import { MundialScreen } from "./components/MundialScreen.jsx";
 import { TendenciasScreen } from "./components/TendenciasScreen.jsx";
 import { QuizScreen } from "./components/QuizScreen.jsx";
 import { StatsScreen } from "./components/StatsScreen.jsx";
+import { FeedScreen } from "./components/FeedScreen.jsx";
+import { JerseyAvatar } from "./components/JerseyAvatar.jsx";
 
 // ─── HOME ─────────────────────────────────────────────────────────────────────
 
@@ -50,6 +52,7 @@ const HomeScreen = ({participants,adminAuth,participantName,setParticipantName,p
         <button style={btn()} onClick={()=>setScreen("admin")}>Panel de Admin</button>
       )}
       {passError&&<div style={{color:C.red,fontSize:12,marginTop:6}}>Contraseña incorrecta</div>}
+      {!adminAuth&&<div style={{color:"#555",fontSize:11,marginTop:6}}>Contraseña inicial: admin123</div>}
     </div>
     <div style={{display:"flex",flexDirection:"column",gap:8}}>
       <button style={{...btn("outline"),width:"100%"}} onClick={()=>setScreen("ranking")}>🏆 Ver Tabla General</button>
@@ -154,21 +157,26 @@ const AdminScreen = ({participants,results,openJornadas,savedMsg,handleResultCha
       {/* Quiz management */}
       <div style={card}>
         <div style={sec}>🧠 Control de Quizzes</div>
-        <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:14}}>
-          {Array.from({length:17},(_,i)=>{
-            const label=`quiz-${i+1}`;
-            const isOpen=quizOpenDates&&quizOpenDates.includes(label);
-            return (
-              <button key={label} onClick={()=>handleQuizToggle(label)}
-                style={{background:isOpen?"rgba(27,127,74,0.2)":"rgba(255,255,255,0.04)",border:`1px solid ${isOpen?"#1b7f4a":"#333"}`,borderRadius:8,padding:"10px 12px",cursor:"pointer",textAlign:"center",minWidth:56,color:isOpen?"#4ade80":"#888"}}>
-                <div style={{fontSize:11,fontWeight:700,color:isOpen?"#4ade80":"#ccc"}}>Quiz</div>
-                <div style={{fontSize:20,fontWeight:900,color:isOpen?"#4ade80":"#ccc"}}>{i+1}</div>
-                {isOpen&&<div style={{fontSize:10,color:"#4ade80",marginTop:2}}>🟢</div>}
-              </button>
-            );
-          })}
+        <div style={{display:"flex",gap:8,marginBottom:12,flexWrap:"wrap"}}>
+          <input style={{...inp,flex:1}} placeholder="Etiqueta del quiz (ej: 2026-06-11)"
+            value={newQuizLabel} onChange={e=>setNewQuizLabel(e.target.value)}/>
+          <button style={btn()} onClick={()=>{if(newQuizLabel.trim()){handleQuizToggle(newQuizLabel.trim());setNewQuizLabel("");}}}>
+            Abrir quiz
+          </button>
         </div>
-        <div style={{fontSize:12,color:"#888"}}>Click en un quiz para abrirlo o cerrarlo. Verde = abierto.</div>
+        {quizOpenDates&&quizOpenDates.length>0?(
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            {quizOpenDates.map(label=>(
+              <div key={label} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"rgba(27,127,74,0.1)",border:"1px solid #1b7f4a",borderRadius:8,padding:"8px 12px"}}>
+                <span style={{fontWeight:600}}>📅 {label}</span>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <span style={{fontSize:12,color:"#4ade80"}}>🟢 Abierto</span>
+                  <button style={{background:"#7f1b1b",border:"none",color:"#fff",borderRadius:6,padding:"4px 10px",cursor:"pointer",fontSize:12}} onClick={()=>handleQuizToggle(label)}>Cerrar</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ):<div style={{color:"#555",fontSize:13}}>No hay quizzes abiertos.</div>}
       </div>
 
       {/* Contraseña */}
@@ -256,7 +264,17 @@ const ParticipantScreen = ({activeParticipant,openJornadas,results,currentPreds,
         </div>
       </div>
 
-      {/* Mini stats */}
+      {/* Jersey + mini stats */}
+      <div style={{display:"flex",gap:8,marginBottom:16,alignItems:"center"}}>
+        <div style={{...card,padding:"12px",marginBottom:0,display:"flex",flexDirection:"column",alignItems:"center",gap:6}}>
+          <JerseyAvatar number={activeParticipant?.avatar_number||10} size={50}/>
+          <input type="number" min="1" max="99"
+            defaultValue={activeParticipant?.avatar_number||10}
+            onBlur={e=>handleUpdateAvatar(Math.min(99,Math.max(1,Number(e.target.value)||10)))}
+            style={{width:50,textAlign:"center",background:"#0f3460",border:"1px solid #444",borderRadius:6,color:"#fff",fontSize:16,fontWeight:900,padding:"4px 0",outline:"none"}}/>
+          <div style={{fontSize:9,color:"#555"}}>Tu número</div>
+        </div>
+      </div>
       <div style={{display:"flex",gap:8,marginBottom:16}}>
         <div style={{...card,flex:1,padding:"12px",textAlign:"center",marginBottom:0}}>
           <div style={{fontSize:20,fontWeight:900,color:C.red}}>{ranking.find(r=>r.id===activeParticipantId)?.total||0}</div>
@@ -379,30 +397,7 @@ const RankingScreen = ({ranking,results,participants,openJornadas,earnedBadges,c
                 {i<3?medals[i]:`#${i+1}`}
               </div>
               <div style={{flex:1}}>
-                <div style={{display:"flex",alignItems:"center",gap:6}}>
-                  <span style={{fontWeight:700,fontSize:16}}>{p.name}</span>
-                  {(()=>{
-                    // Calc prev jornada ranking (exclude latest jornada)
-                    const latestJ = Math.max(...[1,2,3].filter(j=>ALL_MATCHES.some(m=>m.jornada===j&&results[m.id]?.homeGoals!=null)));
-                    if(!latestJ||latestJ===0) return null;
-                    const prevRanking=[...ranking].map(pp=>{
-                      let prevPts=0;
-                      ALL_MATCHES.forEach(m=>{
-                        if(m.jornada>=latestJ) return;
-                        const r=results[m.id];
-                        const pred=(pp.predictions||{})[m.id];
-                        if(r&&r.homeGoals!=null&&pred){const pts=calcScore(pred,r);if(pts!=null)prevPts+=pts;}
-                      });
-                      return {...pp,prevPts};
-                    }).sort((a,b)=>b.prevPts-a.prevPts);
-                    const prevPos=prevRanking.findIndex(pp=>pp.id===p.id)+1;
-                    const currPos=i+1;
-                    const diff=prevPos-currPos;
-                    if(diff>0) return <span style={{color:"#4ade80",fontSize:13,fontWeight:700}}>▲{diff}</span>;
-                    if(diff<0) return <span style={{color:"#f87171",fontSize:13,fontWeight:700}}>▼{Math.abs(diff)}</span>;
-                    return <span style={{color:"#555",fontSize:13}}>—</span>;
-                  })()}
-                </div>
+                <div style={{fontWeight:700,fontSize:16}}>{p.name}</div>
                 <div style={{marginTop:6,background:"rgba(255,255,255,0.06)",borderRadius:4,height:6,overflow:"hidden"}}>
                   <div style={{height:"100%",width:`${Math.round((p.total/maxPts)*100)}%`,background:i===0?C.red:C.blue,borderRadius:4}}/>
                 </div>
@@ -713,6 +708,20 @@ export default function QuinielaMundial() {
   },[quizOpenDates]);
 
   // Rename participant
+  const handleUpdateAvatar = async (number) => {
+    if (!activeParticipantId) return;
+    await db.updateAvatarNumber(activeParticipantId, number);
+    setParticipants(prev => prev.map(p => p.id === activeParticipantId ? {...p, avatar_number: number} : p));
+    // First time avatar bonus
+    const me = participants.find(p => p.id === activeParticipantId);
+    if (!me?.avatar_number || me.avatar_number === 10) {
+      const current = coins.find(c => c.participant_id === activeParticipantId)?.total || 0;
+      await db.upsertCoins(activeParticipantId, current + 10);
+      const newCoins = await db.getCoins();
+      setCoins(newCoins);
+    }
+  };
+
   const handleRenameParticipant=useCallback(async(id, newName)=>{
     if(!newName.trim()) return;
     if(participants.find(p=>p.name.toLowerCase()===newName.toLowerCase()&&p.id!==id)){
@@ -793,6 +802,7 @@ export default function QuinielaMundial() {
     quiz: <QuizScreen participant={activeParticipant} openQuizDates={quizOpenDates} onSaveAnswers={handleSaveQuizAnswers}/>,
     perfil: <ProfileScreen participant={activeParticipant} results={results} earnedBadges={earnedBadges} coins={coins}/>,
     stats: <StatsScreen participants={participants} results={results}/>,
+    feed: <FeedScreen participant={activeParticipant} participants={participants} isAdmin={adminAuth} onBadgeEarned={handlePhotoBadge}/>,
   };
 
   return (
@@ -824,6 +834,7 @@ export default function QuinielaMundial() {
           <button style={navBtn(screen==="mundial")} onClick={()=>setScreen("mundial")}>🌎 Mundial</button>
           <button style={navBtn(screen==="tendencias")} onClick={()=>setScreen("tendencias")}>🔮 Tendencias</button>
           <button style={navBtn(screen==="quiz")} onClick={()=>setScreen("quiz")}>🧠 Quiz</button>
+          <button style={navBtn(screen==="feed")} onClick={()=>setScreen("feed")}>📸 Feed</button>
           {adminAuth&&<button style={navBtn(screen==="admin")} onClick={()=>setScreen("admin")}>⚙️ Admin</button>}
         </div>
       </div>
