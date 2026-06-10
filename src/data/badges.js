@@ -1,21 +1,24 @@
 import { ALL_MATCHES, getResult, isExact, isResultCorrect } from "../data/matches.js";
 
 export const BADGE_DEFS = {
-  EZ:           { emoji:"⚡", name:"EZ",             desc:"Marcador exacto acertado",                    coins:40,   type:"season" },
-  GRITALO:      { emoji:"👑", name:"Grítalo Reina",  desc:"Más marcadores exactos de la jornada",        coins:100,  type:"dynamic" },
-  SO_HOT:       { emoji:"🔥", name:"So Hot",         desc:"5-9 resultados correctos en una jornada",     coins:50,   type:"season" },
-  ON_FIRE:      { emoji:"🚒", name:"Muy Caliente",   desc:"10-15 resultados correctos en una jornada",   coins:120,  type:"season" },
-  MODO_BESTIA:  { emoji:"🐺", name:"En su Prime",    desc:"16+ resultados correctos en una jornada",     coins:200,  type:"season" },
-  EN_SU_PRIME:  { emoji:"🌟", name:"Dios Plan",     desc:"Jornada perfecta — todos los resultados",    coins:400,  type:"season" },
-  GGS:          { emoji:"🧊", name:"Hacker",        desc:"Acertó el partido con menor % de aciertos",   coins:80,   type:"season" },
-  MIL_IQ:       { emoji:"🧠", name:"+1000 de IQ",   desc:"Único en acertar un resultado",               coins:150,  type:"season" },
-  DELULU:       { emoji:"🤪", name:"Delulu",         desc:"Pronóstico más loco y fallido del grupo",     coins:-20,  type:"season" },
-  QUE_BURRO:    { emoji:"🐴", name:"Que Burro, Póngale 0", desc:"Único en fallar lo que todos acertaron", coins:-30, type:"season" },
-  LA_CABRA:     { emoji:"🐐", name:"La Cabra",       desc:"Mayor puntaje de la jornada",                 coins:130,  type:"dynamic" },
-  CRUZAZULEO:   { emoji:"🔵", name:"La Cruzazuleó",  desc:"Segundo lugar de la jornada",                 coins:70,   type:"dynamic" },
-  YA_MERITO:    { emoji:"🥉", name:"Ya Merito",      desc:"Tercer lugar de la jornada",                  coins:40,   type:"dynamic" },
-  MEJOR_NADOTA: { emoji:"🗑️", name:"Mejor Nadota",   desc:"Último lugar de la jornada",                  coins:-30,  type:"dynamic" },
+  EZ:           { emoji:"⚡", name:"EZ",             desc:"Marcador exacto acertado",                    coins:50,   type:"season" },
+  GRITALO:      { emoji:"👑", name:"Grítalo Reina",  desc:"Más marcadores exactos de la jornada",        coins:70,   type:"dynamic" },
+  SO_HOT:       { emoji:"🔥", name:"So Hot",         desc:"5-9 resultados correctos en una jornada",     coins:40,   type:"season" },
+  ON_FIRE:      { emoji:"🚒", name:"On Fire",        desc:"10-15 resultados correctos en una jornada",   coins:80,   type:"season" },
+  MODO_BESTIA:  { emoji:"🐺", name:"Modo Bestia",    desc:"16+ resultados correctos en una jornada",     coins:120,  type:"season" },
+  EN_SU_PRIME:  { emoji:"🌟", name:"En su Prime",    desc:"Jornada perfecta — todos los resultados",     coins:250,  type:"season" },
+  GGS:          { emoji:"🧊", name:"GGs",            desc:"Acertó el partido con menor % de aciertos",   coins:60,   type:"season" },
+  MIL_IQ:       { emoji:"🧠", name:"1000 IQ",        desc:"Único en acertar un resultado",               coins:100,  type:"season" },
+  DELULU:       { emoji:"🤪", name:"Delulu",         desc:"Pronóstico más loco y fallido del grupo",     coins:-30,  type:"season" },
+  QUE_BURRO:    { emoji:"🐴", name:"Que Burro, Póngale 0", desc:"Único en fallar un partido que todos acertaron", coins:-80, type:"season" },
+  LA_CABRA:     { emoji:"🐐", name:"La Cabra",       desc:"Mayor puntaje de la jornada",                 coins:90,   type:"dynamic" },
+  CRUZAZULEO:   { emoji:"🔵", name:"La Cruzazuleó",  desc:"Segundo lugar de la jornada",                 coins:50,   type:"dynamic" },
+  YA_MERITO:    { emoji:"🥉", name:"Ya Merito",      desc:"Tercer lugar de la jornada",                  coins:30,   type:"dynamic" },
+  MEJOR_NADOTA: { emoji:"🗑️", name:"Mejor Nadota",   desc:"Último lugar de la jornada",                  coins:-20,  type:"dynamic" },
   F_WE:         { emoji:"💀", name:"F we",           desc:"Cero puntos en la jornada",                   coins:-60,  type:"dynamic" },
+  PAPARAZZI:    { emoji:"📸", name:"Paparazzi",       desc:"Subiste tu primera foto al feed",              coins:40,   type:"season" },
+  INFLUENCER:   { emoji:"📱", name:"Influencer",      desc:"3 fotos publicadas en el feed",                coins:40,   type:"season" },
+  CONTENT_CREATOR: { emoji:"⭐", name:"Content Creator", desc:"5 fotos publicadas en el feed",             coins:40,   type:"season" },
 };
 
 export const COIN_VALUES = Object.fromEntries(
