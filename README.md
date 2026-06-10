@@ -1,1 +1,1 @@
-# quiniela-testeo-
+# QuinielaTopos-Mundial2026
